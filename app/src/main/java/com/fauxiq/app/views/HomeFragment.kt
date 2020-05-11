@@ -52,88 +52,71 @@ class HomeFragment : Fragment(), OnRowClickListener {
     private fun addTask(taskModel: TaskModel) {
 
         viewModel.addTask(taskModel).observe(viewLifecycleOwner, Observer {
-
             when (it.status) {
-
                 Status.ERROR -> {
                     activity?.toast("Database Error")
                     progressBar.visibility = View.GONE
-
                 }
-
                 Status.SUCCESS -> {
                     progressBar.visibility = View.GONE
-                    activity?.toast("Task created successfully")
+                    textView3.visibility = View.GONE
                     mAdapter.addTask(taskModel)
+                    //or loadTasks()
                     mAdapter.notifyDataSetChanged()
                     recyclerView.scrollToPosition(mAdapter.getSize() - 1)
                 }
-
                 Status.LOADING -> {
                     progressBar.visibility = View.VISIBLE
-
                 }
             }
-
         })
     }
 
     private fun loadTasks() {
-
         viewModel.loadTasks().observe(viewLifecycleOwner, Observer {
-
             when (it.status) {
-
                 Status.ERROR -> {
                     activity?.toast("Database Error")
                     progressBar.visibility = View.GONE
-
                 }
-
                 Status.SUCCESS -> {
                     progressBar.visibility = View.GONE
 
-                    activity?.toast("Tasks loaded successfully")
                     mAdapter.clear()
-
-                    it.data?.let { it1 -> mAdapter.addTasks(it1 as ArrayList<TaskModel>) }
+                    it.data?.let { it1 ->
+                        mAdapter.addTasks(it1 as ArrayList<TaskModel>)
+                        if (it1.isNotEmpty()) {
+                            textView3.visibility = View.GONE
+                        }
+                    }
                     mAdapter.notifyDataSetChanged()
                 }
-
                 Status.LOADING -> {
                     progressBar.visibility = View.VISIBLE
-
                 }
             }
         })
     }
 
-    private fun deleteTask(taskId: TaskModel) {
-
-        viewModel.deleteTask(taskId).observe(viewLifecycleOwner, Observer {
-
+    private fun deleteTask(taskModel: TaskModel) {
+        viewModel.deleteTask(taskModel).observe(viewLifecycleOwner, Observer {
             when (it.status) {
-
                 Status.ERROR -> {
                     activity?.toast("Database Error")
                     progressBar.visibility = View.GONE
                 }
-
                 Status.SUCCESS -> {
                     loadTasks()
                     progressBar.visibility = View.GONE
                 }
-
                 Status.LOADING -> {
                     progressBar.visibility = View.VISIBLE
                 }
             }
-
         })
     }
 
     private fun showAddTaskDialog() {
-
         val alert = AlertDialog.Builder(activity as MainActivity)
         alert.setTitle(R.string.add_task)
         alert.setCancelable(false)
@@ -145,7 +128,6 @@ class HomeFragment : Fragment(), OnRowClickListener {
         val amount = dialogLayout?.findViewById<TextInputEditText>(R.id.amountTv)
 
         quantity?.addTextChangedListener(object : TextWatcher {
-
             override fun afterTextChanged(qty: Editable?) {
                 val quantity = qty.toString().toFloat()
                 val rateItem = rate?.text.toString().toFloat()
@@ -153,17 +135,13 @@ class HomeFragment : Fragment(), OnRowClickListener {
             }
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
             }
-
         })
 
         alert.setPositiveButton(R.string.add) { dialog, whichButton ->
-            dialog.cancel()
 
             val name = name?.text.toString()
             val rate = rate?.text.toString()
@@ -176,6 +154,8 @@ class HomeFragment : Fragment(), OnRowClickListener {
             } else {
                 activity?.toast("Please fill all fields")
             }
+
+            dialog.cancel()
 
         }
 
@@ -221,14 +201,23 @@ class HomeFragment : Fragment(), OnRowClickListener {
     }
 
 
+    override fun onDeleteClick(position: Int, taskModel: TaskModel) {
 
-    override fun onDeleteClick(position: Int, taskId: TaskModel) {
-
-        deleteTask(taskId)
+        deleteTask(taskModel)
     }
 
     override fun onCardClicked(position: Int, taskModel: TaskModel) {
 
         gotoTaskDetails(taskModel)
     }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        val actionbar = (activity as MainActivity).supportActionBar
+        actionbar?.setDisplayShowHomeEnabled(false)
+        actionbar?.setDisplayHomeAsUpEnabled(false)
+        actionbar?.show()
+    }
+
 }

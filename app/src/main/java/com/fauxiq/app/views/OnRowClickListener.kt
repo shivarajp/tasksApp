@@ -5,7 +5,7 @@ import java.text.FieldPosition
 
 interface OnRowClickListener {
 
-    fun onDeleteClick(position: Int, taskId : TaskModel)
-    fun onCardClicked(position: Int, taskId : TaskModel)
+    fun onDeleteClick(position: Int, taskModel : TaskModel)
+    fun onCardClicked(position: Int, taskModel : TaskModel)
 
 }
